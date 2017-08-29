@@ -1,15 +1,17 @@
-from PyQt5 import QtCore, QtGui
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
-class myWindow(QtGui.QMainWindow):
+class myWindow(QMainWindow):
     def __init__(self, parent=None):
         super(myWindow, self).__init__(parent)
-        self.centralwidget  = QtGui.QWidget(self)
-        self.lineEdit       = QtGui.QLineEdit(self.centralwidget)
-        self.view           = QtGui.QTableView(self.centralwidget)
-        self.comboBox       = QtGui.QComboBox(self.centralwidget)
-        self.label          = QtGui.QLabel(self.centralwidget)
+        self.centralwidget  = QWidget(self)
+        self.lineEdit       = QLineEdit(self.centralwidget)
+        self.view           = QTableView(self.centralwidget)
+        self.comboBox       = QComboBox(self.centralwidget)
+        self.label          = QLabel(self.centralwidget)
 
-        self.gridLayout = QtGui.QGridLayout(self.centralwidget)
+        self.gridLayout = QGridLayout(self.centralwidget)
         self.gridLayout.addWidget(self.lineEdit, 0, 1, 1, 1)
         self.gridLayout.addWidget(self.view, 1, 0, 1, 3)
         self.gridLayout.addWidget(self.comboBox, 0, 2, 1, 1)
@@ -18,16 +20,16 @@ class myWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.centralwidget)
         self.label.setText("Regex Filter")
 
-        self.model = QtGui.QStandardItemModel(self)
+        self.model = QStandardItemModel(self)
 
-        for rowName in range(3) * 5:
+        for rowName in range(3):
             self.model.invisibleRootItem().appendRow(
-                [   QtGui.QStandardItem("row {0} col {1}".format(rowName, column))
+                [   QStandardItem("row {0} col {1}".format(rowName, column))
                     for column in range(3)
                     ]
             )
 
-        self.proxy = QtGui.QSortFilterProxyModel(self)
+        self.proxy = QSortFilterProxyModel(self)
         self.proxy.setSourceModel(self.model)
 
         self.view.setModel(self.proxy)
@@ -39,11 +41,11 @@ class myWindow(QtGui.QMainWindow):
         self.horizontalHeader = self.view.horizontalHeader()
         self.horizontalHeader.sectionClicked.connect(self.on_view_horizontalHeader_sectionClicked)
 
-    @QtCore.pyqtSlot(int)
+    @pyqtSlot(int)
     def on_view_horizontalHeader_sectionClicked(self, logicalIndex):
         self.logicalIndex   = logicalIndex
-        self.menuValues     = QtGui.QMenu(self)
-        self.signalMapper   = QtCore.QSignalMapper(self)
+        self.menuValues     = QMenu(self)
+        self.signalMapper   = QSignalMapper(self)
 
         self.comboBox.blockSignals(True)
         self.comboBox.setCurrentIndex(self.logicalIndex)
@@ -53,13 +55,13 @@ class myWindow(QtGui.QMainWindow):
                             for row in range(self.model.rowCount())
                             ]
 
-        actionAll = QtGui.QAction("All", self)
+        actionAll = QAction("All", self)
         actionAll.triggered.connect(self.on_actionAll_triggered)
         self.menuValues.addAction(actionAll)
         self.menuValues.addSeparator()
 
         for actionNumber, actionName in enumerate(sorted(list(set(valuesUnique)))):
-            action = QtGui.QAction(actionName, self)
+            action = QAction(actionName, self)
             self.signalMapper.setMapping(action, actionNumber)
             action.triggered.connect(self.signalMapper.map)
             self.menuValues.addAction(action)
@@ -71,41 +73,41 @@ class myWindow(QtGui.QMainWindow):
         posY = headerPos.y() + self.horizontalHeader.height()
         posX = headerPos.x() + self.horizontalHeader.sectionPosition(self.logicalIndex)
 
-        self.menuValues.exec_(QtCore.QPoint(posX, posY))
+        self.menuValues.exec_(QPoint(posX, posY))
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def on_actionAll_triggered(self):
         filterColumn = self.logicalIndex
-        filterString = QtCore.QRegExp(  "",
-                                        QtCore.Qt.CaseInsensitive,
-                                        QtCore.QRegExp.RegExp
+        filterString = QRegExp(  "",
+                                        CaseInsensitive,
+                                        QRegExp.RegExp
                                         )
 
         self.proxy.setFilterRegExp(filterString)
         self.proxy.setFilterKeyColumn(filterColumn)
 
-    @QtCore.pyqtSlot(int)
+    @pyqtSlot(int)
     def on_signalMapper_mapped(self, i):
         stringAction = self.signalMapper.mapping(i).text()
         filterColumn = self.logicalIndex
-        filterString = QtCore.QRegExp(  stringAction,
-                                        QtCore.Qt.CaseSensitive,
-                                        QtCore.QRegExp.FixedString
+        filterString = QRegExp(  stringAction,
+                                        Qt.CaseSensitive,
+                                        QRegExp.FixedString
                                         )
 
         self.proxy.setFilterRegExp(filterString)
         self.proxy.setFilterKeyColumn(filterColumn)
 
-    @QtCore.pyqtSlot(str)
+    @pyqtSlot(str)
     def on_lineEdit_textChanged(self, text):
-        search = QtCore.QRegExp(    text,
-                                    QtCore.Qt.CaseInsensitive,
-                                    QtCore.QRegExp.RegExp
+        search = QRegExp(    text,
+                                    CaseInsensitive,
+                                    QRegExp.RegExp
                                     )
 
         self.proxy.setFilterRegExp(search)
 
-    @QtCore.pyqtSlot(int)
+    @pyqtSlot(int)
     def on_comboBox_currentIndexChanged(self, index):
         self.proxy.setFilterKeyColumn(index)
 
@@ -113,7 +115,7 @@ class myWindow(QtGui.QMainWindow):
 if __name__ == "__main__":
     import sys
 
-    app  = QtGui.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     main = myWindow()
     main.show()
     main.resize(400, 600)
